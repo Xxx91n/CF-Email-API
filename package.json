@@ -1,0 +1,20 @@
+{
+  "name": "cf-email-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "hono": "^4.7.0",
+    "postal-mime": "^2.4.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250405.0",
+    "typescript": "^5.8.0",
+    "wrangler": "^4.0.0",
+    "vitest": "^2.1.0"
+  }
+}
