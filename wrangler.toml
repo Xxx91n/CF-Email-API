@@ -14,7 +14,7 @@ REQUIRE_AUTH = "false"
 
 [[kv_namespaces]]
 binding = "EMAIL_KV"
-id = "your-kv-namespace-id"
+id = "055e6d68a3eb4841a282ff679b63026f"
 
 [ai]
 binding = "AI"
