@@ -1,8 +1,6 @@
 name = "cf-email-api"
 main = "src/index.ts"
 compatibility_date = "2026-04-08"
-
-# nodejs_compat 在 compatibility_date >= 2024-09-23 时自动包含 v2 行为
 compatibility_flags = ["nodejs_compat"]
 
 [observability]
@@ -11,14 +9,11 @@ enabled = true
 [vars]
 DEFAULT_TTL = "600"
 DEFAULT_TTL_UNIT = "seconds"
-# ENABLE_AI = "true" 时需要 Workers AI binding；若不需要 AI 提取可设为 "false"
 ENABLE_AI = "true"
 REQUIRE_AUTH = "false"
 
 [[kv_namespaces]]
 binding = "EMAIL_KV"
-# 部署前请替换为真实的 KV namespace ID
-# 创建方式：wrangler kv namespace create EMAIL_KV
 id = "your-kv-namespace-id"
 
 [ai]
