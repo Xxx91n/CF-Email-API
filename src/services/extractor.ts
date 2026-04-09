@@ -17,6 +17,7 @@ const PATTERNS: RegexPattern[] = [
   { name: 'en_verification_code', pattern: /verification\s*code[:\s\-]+([0-9]{4,8})/i, example: 'Verification code: 123456', capture: 1 },
   { name: 'en_your_code', pattern: /your\s+(?:one[- ]time\s+)?code\s+(?:is\s+)?[:\s\-]*([0-9]{4,8})/i, example: 'Your code is 123456', capture: 1 },
   { name: 'en_enter_code', pattern: /(?:enter|use|input)\s+(?:the\s+)?(?:following\s+)?code[:\s\-]+([0-9]{4,8})/i, example: 'Please enter code: 847291', capture: 1 },
+  { name: 'en_launch_code', pattern: /launch\s*code[^\d]*([0-9]{6,8})/i, example: 'Your GitHub launch code: 49297498', capture: 1 },
   { name: 'en_otp', pattern: /\bOTP[:\s\-]+([0-9]{4,8})/i, example: 'OTP: 123456', capture: 1 },
   { name: 'en_passcode', pattern: /(?:pass\s*code|security\s*code|access\s*code)[:\s\-]+([0-9]{4,8})/i, example: 'Security code: 123456', capture: 1 },
   { name: 'en_is_digit', pattern: /(?:code|token)\s+is[:\s]+([0-9]{4,8})\b/i, example: 'Your token is 847291', capture: 1 },
@@ -27,8 +28,6 @@ const PATTERNS: RegexPattern[] = [
   { name: 'ko_verification', pattern: /인증(?:\s*번호|\s*코드)[：:\s]*([0-9]{4,8})/, example: '인증번호: 123456', capture: 1 },
   { name: 'spaced_6digit', pattern: /\b([0-9](?:\s[0-9]){5})\b|([0-9]{2}(?:\s[0-9]{2}){2})\b/, example: '1 2 3 4 5 6', capture: 1 },
   { name: 'hyphen_6digit', pattern: /\b([0-9]{3})-([0-9]{3})\b/, example: '123-456', capture: 0 },
-  { name: 'url_code_param', pattern: /[?&](?:code|otp|verify|confirmation)=([0-9]{4,8})/i, example: '?code=847291', capture: 1 },
-  { name: 'url_token_param', pattern: /[?&](?:code|otp|verify|confirmation)=([A-Za-z0-9]{4,8})/i, example: '?code=A1B2C3', capture: 1 },
 ];
 
 const FALLBACK_PATTERN = /\b([0-9]{6})\b/;
@@ -66,14 +65,20 @@ function extractAlphanumericCode(text: string): { code: string; confidence: numb
   let m: RegExpExecArray | null;
   while ((m = RE.exec(text)) !== null) {
     const candidate = m[1];
-    const hasDigit  = /[0-9]/.test(candidate);
+    const hasDigit = /[0-9]/.test(candidate);
     const hasLetter = /[A-Z]/.test(candidate);
 
     if (!hasDigit || !hasLetter) continue;
 
+    const looksLikeUuidFragment = /^[0-9A-F]{8}$/.test(candidate);
+    if (looksLikeUuidFragment) continue;
+
+    const isPureHex = /^[0-9A-F]+$/.test(candidate) && !/[G-Z]/.test(candidate);
+    if (isPureHex) continue;
+
     const nearContext = text.slice(Math.max(0, m.index - 40), m.index + candidate.length + 40);
-    const hasContext  = /code|token|otp|verify|驗證|验证|認証/i.test(nearContext);
-    const confidence  = hasContext ? 0.92 : 0.70;
+    const hasContext = /code|token|otp|verify|驗證|验证|認証|guard/i.test(nearContext);
+    const confidence = hasContext ? 0.92 : 0.70;
 
     candidates.push({ code: candidate, confidence });
   }
@@ -121,6 +126,9 @@ export async function extractVerificationCode(
   env: Env,
   enableAI: boolean = true
 ): Promise<ExtractionResult> {
+  const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
+  text = text.replace(UUID_PATTERN, '');
+
   const matches: Match[] = [];
 
   for (const p of PATTERNS) {
@@ -145,15 +153,10 @@ export async function extractVerificationCode(
     const best = selectBestMatch(matches);
     if (best) {
       const bestMatch = matches.find(m => m.code === best)!;
-      const isUrlParam = bestMatch.patternName.startsWith('url_');
       const isAlphaNum = /[A-Za-z]/.test(best);
-      const codeType: CodeType = isUrlParam
-        ? 'url_param'
-        : isAlphaNum ? 'alphanumeric' : 'numeric';
+      const codeType: CodeType = isAlphaNum ? 'alphanumeric' : 'numeric';
 
-      const confidence = isUrlParam ? 0.88 : 0.95;
-
-      return { code: best, codeType, confidence };
+      return { code: best, codeType, confidence: 0.95 };
     }
   }
 
