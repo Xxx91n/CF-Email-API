@@ -110,7 +110,7 @@ npx wrangler deploy
 | `ENABLE_AI` | `true` | 是否启用 AI 兜底提取 |
 | `REQUIRE_AUTH` | `false` | 是否需要认证 |
 
->**若配置 REQUIRE_AUTH 为 true ，后续配置文档查看 [**REQUIRE.md**](./REQUIRE.md)**
+>**若配置 REQUIRE_AUTH 为 true ，查看后续配置 [**文档**](./REQUIRE.md)**
 
 
 ## 简易使用示例
@@ -169,11 +169,11 @@ curl https://your-worker.workers.dev/{prefix}/email
 - 韩文：`인증번호: 123456`
 - 分组格式：`1 2 3 4 5 6`、`123-456`
 
-### 字母数字混合验证码（新增）
+### 字母数字混合验证码
 - GitHub 风格：`A3F9K2`（6-10位字母数字混合）
 - API 密钥风格：`X7Yz9AbC`（大小写混合）
 
-### URL 参数验证码（新增）
+### URL 参数验证码
 - 链接参数：`?code=847291`、`?token=A1B2C3`
 - 验证链接：`https://example.com/verify?code=ABC123`
 

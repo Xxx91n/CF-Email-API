@@ -1,7 +1,7 @@
 <div align="center">
 <h1 align="center">CF Email API</h1>
 
-[**English**](./README_EN.md) | [**简体中文**](./README.md)
+**English** | [**简体中文**](./README.md)
 
 <p align="center">
 <a href="https://github.com/Xxx91n/CF-Email-API/blob/main/LICENSE" target="_self">
@@ -109,7 +109,7 @@ Now GitHub Actions workflow can reference this secret via `${{ secrets.CLOUDFLAR
 | `ENABLE_AI` | `true` | Enable AI fallback extraction |
 | `REQUIRE_AUTH` | `false` | Require authentication |
 
-> **If REQUIRE_AUTH is true, see [**REQUIRE_EN.md**](./REQUIRE_EN.md)**
+> **If REQUIRE_AUTH is true, see [**document**](./REQUIRE_EN.md)**.
 
 ## Usage Examples
 
@@ -166,11 +166,11 @@ curl https://your-worker.workers.dev/{prefix}/email
 - Korean: `인증번호: 123456`
 - Grouped format: `1 2 3 4 5 6`, `123-456`
 
-### Alphanumeric Codes (New)
+### Alphanumeric Codes
 - GitHub style: `A3F9K2` (6-10 character alphanumeric)
 - API key style: `X7Yz9AbC` (mixed case)
 
-### URL Parameter Codes (New)
+### URL Parameter Codes
 - Link parameters: `?code=847291`, `?token=A1B2C3`
 - Verification links: `https://example.com/verify?code=ABC123`
 
