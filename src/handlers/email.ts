@@ -38,7 +38,7 @@ export async function handleEmail(
     await saveEmail(env.EMAIL_KV, prefix, emailData, ttl);
 
     const duration = Date.now() - startTime;
-    console.log(`[email] saved prefix=${prefix} code=${code ?? 'null'} type=${codeType} conf=${confidence} ttl=${ttl}s duration=${Date.now() - startTime}ms`);
+    console.log(`[email] saved prefix=${prefix} code=${code ?? 'null'} type=${codeType} conf=${confidence} ttl=${ttl}s duration=${duration}ms`);
   } catch (err) {
     console.error(`[email] error processing prefix=${prefix}:`, err);
   }
