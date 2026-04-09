@@ -28,6 +28,8 @@ const PATTERNS: RegexPattern[] = [
   { name: 'ko_verification', pattern: /인증(?:\s*번호|\s*코드)[：:\s]*([0-9]{4,8})/, example: '인증번호: 123456', capture: 1 },
   { name: 'spaced_6digit', pattern: /\b([0-9](?:\s[0-9]){5})\b|([0-9]{2}(?:\s[0-9]{2}){2})\b/, example: '1 2 3 4 5 6', capture: 1 },
   { name: 'hyphen_6digit', pattern: /\b([0-9]{3})-([0-9]{3})\b/, example: '123-456', capture: 0 },
+  { name: 'url_code_numeric', pattern: /[?&\/](?:code|otp|token|verify|confirm|confirmation)=([0-9]{4,8})(?:[&\s]|$)/i, example: '?code=847291', capture: 1 },
+  { name: 'url_code_alphanum', pattern: /[?&\/](?:code|otp|token|verify|confirm|confirmation)=([A-Za-z0-9]{4,8})(?:[&\s]|$)/i, example: '?code=ABC123', capture: 1 },
 ];
 
 const FALLBACK_PATTERN = /\b([0-9]{6})\b/;
@@ -153,10 +155,12 @@ export async function extractVerificationCode(
     const best = selectBestMatch(matches);
     if (best) {
       const bestMatch = matches.find(m => m.code === best)!;
+      const isUrlParam = bestMatch.patternName.startsWith('url_');
       const isAlphaNum = /[A-Za-z]/.test(best);
-      const codeType: CodeType = isAlphaNum ? 'alphanumeric' : 'numeric';
+      const codeType: CodeType = isUrlParam ? 'url_param' : isAlphaNum ? 'alphanumeric' : 'numeric';
+      const confidence = isUrlParam ? 0.65 : 0.95;
 
-      return { code: best, codeType, confidence: 0.95 };
+      return { code: best, codeType, confidence };
     }
   }
 
