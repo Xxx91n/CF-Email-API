@@ -8,6 +8,8 @@ export interface Env {
   AUTH_TOKEN?: string;
 }
 
+export type CodeType = 'numeric' | 'alphanumeric' | 'url_param' | null;
+
 export interface EmailData {
   from: string;
   to: string;
@@ -15,6 +17,8 @@ export interface EmailData {
   text: string;
   html?: string;
   code: string | null;
+  codeType: CodeType;
+  codeConfidence: number | null;
   receivedAt: string;
   expiresAt: string;
 }

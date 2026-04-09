@@ -19,7 +19,7 @@ export async function handleEmail(
     const ttl = parseTTLConfig(env.DEFAULT_TTL, env.DEFAULT_TTL_UNIT);
 
     const enableAI = env.ENABLE_AI === 'true';
-    const code = await extractVerificationCode(parsed.text, env, enableAI);
+    const { code, codeType, confidence } = await extractVerificationCode(parsed.text, env, enableAI);
 
     const now = new Date();
     const emailData: EmailData = {
@@ -29,6 +29,8 @@ export async function handleEmail(
       text: parsed.text,
       html: parsed.html,
       code,
+      codeType,
+      codeConfidence: confidence,
       receivedAt: now.toISOString(),
       expiresAt: new Date(now.getTime() + ttl * 1000).toISOString(),
     };
@@ -36,7 +38,7 @@ export async function handleEmail(
     await saveEmail(env.EMAIL_KV, prefix, emailData, ttl);
 
     const duration = Date.now() - startTime;
-    console.log(`[email] saved prefix=${prefix} code=${code ?? 'null'} ttl=${ttl}s duration=${duration}ms`);
+    console.log(`[email] saved prefix=${prefix} code=${code ?? 'null'} type=${codeType} conf=${confidence} ttl=${ttl}s duration=${Date.now() - startTime}ms`);
   } catch (err) {
     console.error(`[email] error processing prefix=${prefix}:`, err);
   }

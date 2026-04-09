@@ -1,4 +1,10 @@
-import type { Env } from '../types';
+import type { Env, CodeType } from '../types';
+
+export interface ExtractionResult {
+  code: string | null;
+  codeType: CodeType;
+  confidence: number | null;
+}
 
 interface RegexPattern {
   name: string;
@@ -21,6 +27,8 @@ const PATTERNS: RegexPattern[] = [
   { name: 'ko_verification', pattern: /인증(?:\s*번호|\s*코드)[：:\s]*([0-9]{4,8})/, example: '인증번호: 123456', capture: 1 },
   { name: 'spaced_6digit', pattern: /\b([0-9](?:\s[0-9]){5})\b|([0-9]{2}(?:\s[0-9]{2}){2})\b/, example: '1 2 3 4 5 6', capture: 1 },
   { name: 'hyphen_6digit', pattern: /\b([0-9]{3})-([0-9]{3})\b/, example: '123-456', capture: 0 },
+  { name: 'url_code_param', pattern: /[?&](?:code|otp|verify|confirmation)=([0-9]{4,8})/i, example: '?code=847291', capture: 1 },
+  { name: 'url_token_param', pattern: /[?&](?:code|otp|verify|confirmation)=([A-Za-z0-9]{4,8})/i, example: '?code=A1B2C3', capture: 1 },
 ];
 
 const FALLBACK_PATTERN = /\b([0-9]{6})\b/;
@@ -49,6 +57,30 @@ function selectBestMatch(matches: Match[]): string | null {
   if (uniqueCodes.length === 1) return uniqueCodes[0];
 
   return null;
+}
+
+function extractAlphanumericCode(text: string): { code: string; confidence: number } | null {
+  const RE = /\b([A-Z0-9]{6,10})\b/g;
+  const candidates: Array<{ code: string; confidence: number }> = [];
+
+  let m: RegExpExecArray | null;
+  while ((m = RE.exec(text)) !== null) {
+    const candidate = m[1];
+    const hasDigit  = /[0-9]/.test(candidate);
+    const hasLetter = /[A-Z]/.test(candidate);
+
+    if (!hasDigit || !hasLetter) continue;
+
+    const nearContext = text.slice(Math.max(0, m.index - 40), m.index + candidate.length + 40);
+    const hasContext  = /code|token|otp|verify|驗證|验证|認証/i.test(nearContext);
+    const confidence  = hasContext ? 0.92 : 0.70;
+
+    candidates.push({ code: candidate, confidence });
+  }
+
+  if (candidates.length === 0) return null;
+
+  return candidates.sort((a, b) => b.confidence - a.confidence)[0];
 }
 
 async function extractWithAI(text: string, env: Env): Promise<string | null> {
@@ -88,7 +120,7 @@ export async function extractVerificationCode(
   text: string,
   env: Env,
   enableAI: boolean = true
-): Promise<string | null> {
+): Promise<ExtractionResult> {
   const matches: Match[] = [];
 
   for (const p of PATTERNS) {
@@ -111,20 +143,44 @@ export async function extractVerificationCode(
 
   if (matches.length > 0) {
     const best = selectBestMatch(matches);
-    if (best) return best;
+    if (best) {
+      const bestMatch = matches.find(m => m.code === best)!;
+      const isUrlParam = bestMatch.patternName.startsWith('url_');
+      const isAlphaNum = /[A-Za-z]/.test(best);
+      const codeType: CodeType = isUrlParam
+        ? 'url_param'
+        : isAlphaNum ? 'alphanumeric' : 'numeric';
+
+      const confidence = isUrlParam ? 0.88 : 0.95;
+
+      return { code: best, codeType, confidence };
+    }
   }
 
   const fallback = text.match(FALLBACK_PATTERN);
   if (fallback) {
     const code = fallback[1];
     if (!/^20[2-3][0-9]$/.test(code)) {
-      return code;
+      return { code, codeType: 'numeric', confidence: 0.75 };
     }
   }
 
-  if (enableAI && env.AI) {
-    return await extractWithAI(text, env);
+  const alphaResult = extractAlphanumericCode(text.toUpperCase());
+  if (alphaResult) {
+    return { code: alphaResult.code, codeType: 'alphanumeric', confidence: alphaResult.confidence };
   }
 
-  return null;
+  if (enableAI && env.AI) {
+    const aiCode = await extractWithAI(text, env);
+    if (aiCode) {
+      const isAlphaNum = /[A-Za-z]/.test(aiCode);
+      return {
+        code: aiCode,
+        codeType: isAlphaNum ? 'alphanumeric' : 'numeric',
+        confidence: 0.60,
+      };
+    }
+  }
+
+  return { code: null, codeType: null, confidence: null };
 }

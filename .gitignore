@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+docs/
 
 # Build output
 dist/
@@ -32,3 +33,6 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# VS Code workspace file
+*.code-workspace
