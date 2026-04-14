@@ -11,7 +11,7 @@
  <img alt="Cloudflare Workers" src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" />
 </a>
 
-基于 Cloudflare Workers + Email Routing 的自定义域名邮箱验证码 API，全程依赖免费服务。
+基于 Cloudflare Workers + Email Routing 的自定义域名邮笱验证码 API，全程依赖免费服务。
 
 专为个人注册机/自动化脚本设计，无需复杂鉴权，一个 GET 请求直取验证码。
 
@@ -27,7 +27,7 @@
 - 极简 HTTP API，无需复杂认证
 - 可配置 TTL，自动过期清理
 - KV 存储，免费额度每天可处理 ~500 封邮件
-- Workers AI 智能兜底，提高验证码提取准确率
+- Workers AI 智能底底，提高验证码提取准确率
 
 ## API 端点
 
@@ -41,7 +41,7 @@
 
 ### 方式一：快速部署（推荐）
 
-点击下方按钮，自动 Fork 并部署：
+点击下方按鈕，自动 Fork 并部署：
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/Xxx91n/CF-Email-API)
 
@@ -93,12 +93,12 @@ npx wrangler deploy
 3. 使用模板“编辑 Cloudflare Workers”，确保权限 `Account.Workers Scripts:Edit`，资源限制选择“所有账户”和“所有区域”，然后创建令牌。
 4. 复制生成的 API 令牌（仅显示一次，请妥善保存）。
 5. 打开 GitHub 仓库页面，进入 **Settings > Secrets and variables > Actions**。
-6. 点击右侧 **New repository secret** 按钮。
+6. 点击右侧 **New repository secret** 按鈕。
 7. 在 **Name** 输入框中输入 `CLOUDFLARE_API_TOKEN`（名称需与部署脚本中引用的一致）。
 8. 在 **Secret** 输入框中粘贴之前复制的 Cloudflare API 令牌。
 9. 点击 **Add secret** 完成添加。 
 
-此后，GitHub Actions 工作流即可通过 `${{ secrets.CLOUDFLARE_API_TOKEN }}` 引用该密钥，实现自动化部署更新。
+此后，GitHub Actions 工作流即可通过 `${{ secrets.CLOUDFLARE_API_TOKEN }}` 引用该密鑰，实现自动化部署更新。
 
 
 ## 参数配置选项
@@ -107,10 +107,10 @@ npx wrangler deploy
 |------|--------|------|
 | `DEFAULT_TTL` | `600` | 邮件过期时间（秒） |
 | `DEFAULT_TTL_UNIT` | `seconds` | TTL 单位（其余支持的参数：minutes、hours、days） |
-| `ENABLE_AI` | `true` | 是否启用 AI 兜底提取 |
+| `ENABLE_AI` | `true` | 是否启用 AI 底底提取 |
 | `REQUIRE_AUTH` | `false` | 是否需要认证 |
 
->**若配置 REQUIRE_AUTH 为 true ，查看后续配置 [**文档**](./REQUIRE.md)**
+>若配置 REQUIRE_AUTH 为 true ，查看后续配置 [**文档**](./REQUIRE.md)
 
 
 ## 简易使用示例
@@ -123,11 +123,11 @@ import time
 import random
 import string
 
-# 生成随机邮箱前缀
+# 生成随机邮笱前缀
 prefix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))
 email = f"{prefix}@yourdomain.com"
 
-# 使用邮箱注册账号
+# 使用邮笱注册账号
 # ... 你的注册逻辑 ...
 
 # 等待邮件到达
@@ -156,9 +156,9 @@ curl https://your-worker.workers.dev/{prefix}/email
 | Workers 请求 | 10万/天 | HTTP API 调用 |
 | KV 读取 | 10万/天 | GET /email、GET /code |
 | **KV 写入** | **1000/天** | **每封邮件 2 次写入，即每天约 500 封** |
-| Workers AI 推理 | 1万/天 | 正则失败时的 AI 兜底 |
+| Workers AI 推理 | 1万/天 | 正则失败时的 AI 底底 |
 
-> 如需更高吞吐，可升级至 Workers Paid（$5/月），写入限额变为 100 万次/月
+> 如需更高吸吐，可升级至 Workers Paid（5$/月），写入限额变为 100 万次/月
 
 ## 支持的验证码格式
 
@@ -171,13 +171,13 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 ### 字母数字混合验证码
 - GitHub 风格：`A3F9K2`（6-10位字母数字混合）
-- API 密钥风格：`X7Yz9AbC`（大小写混合）
+- API 密鑰风格：`X7Yz9AbC`（大小写混合）
 
 ### URL 参数验证码
 - 链接参数：`?code=847291`、`?token=A1B2C3`
 - 验证链接：`https://example.com/verify?code=ABC123`
 
-### AI 语义理解兜底
+### AI 语义理解底底
 - 正则匹配失败时自动调用 Workers AI 提取
 
 ## 已验证支持的平台
@@ -196,7 +196,7 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 ## 贡献
 
-欢迎提交 Issue 和 Pull Request！
+提交 [issue](https://github.com/Xxx91n/CF-Email-API/issues) 或 [PR](https://github.com/Xxx91n/CF-Email-API/pulls)。
 
 ## 许可证
 

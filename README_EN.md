@@ -193,7 +193,7 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 ## Contributing
 
-Issues and Pull Requests are welcome!
+Submit an [issue](https://github.com/Xxx91n/CF-Email-API/issues) or [PR](https://github.com/Xxx91n/CF-Email-API/pulls).
 
 ## License
 
