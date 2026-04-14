@@ -1,37 +1,38 @@
-name: Question
-description: Ask about deployment, configuration, or usage
+name: 使用问题 / Question
+description: 关于部署、配置或使用方式的疑问 / Ask about deployment, configuration, or usage
 labels: ["question"]
 body:
   - type: markdown
     attributes:
       value: |
-        Please check the [README](../README.md) and [existing issues](../../issues?q=is%3Aissue) before asking.
+        提问前请先查阅 README 和已有 Issues，避免重复。
+        Please check the README and existing Issues before asking.
 
   - type: dropdown
     id: topic
     attributes:
-      label: Topic
+      label: 问题类型 / Topic
       options:
-        - Deployment (wrangler / Cloudflare button)
-        - Email Routing configuration
-        - KV / storage
-        - Auth (REQUIRE_AUTH)
-        - Verification code extraction
-        - Other
+        - 部署相关 / Deployment (wrangler / Cloudflare button)
+        - Email Routing 配置 / Email Routing configuration
+        - KV 存储 / KV storage
+        - 鉴权配置 / Auth (REQUIRE_AUTH)
+        - 验证码提取 / Verification code extraction
+        - 其他 / Other
     validations:
       required: true
 
   - type: textarea
     id: question
     attributes:
-      label: Question
+      label: 你的问题 / Your Question
     validations:
       required: true
 
   - type: textarea
     id: context
     attributes:
-      label: What have you tried?
-      description: Share your wrangler.toml config (remove sensitive values), curl output, or logs if relevant.
+      label: 已尝试的方法 / What have you tried?
+      description: 可粘贴你的 wrangler.toml 配置（隐去敏感信息）、curl 输出或日志 / Share your config (remove secrets), curl output, or logs if relevant.
     validations:
       required: false

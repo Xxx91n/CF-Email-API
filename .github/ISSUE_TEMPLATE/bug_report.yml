@@ -1,31 +1,37 @@
-name: Bug Report
-description: Report a malfunction or unexpected behavior
+name: Bug 报告 / Bug Report
+description: 报告一个功能异常或非预期行为 / Report a malfunction or unexpected behavior
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你提交 Bug 报告！请尽量填写完整，以便快速复现和修复。
+        Thanks for taking the time to report a bug!
+
   - type: input
     id: version
     attributes:
-      label: Version
-      description: Which version are you using? Check wrangler.toml or your deployed Worker.
-      placeholder: "e.g. 2025-04-13 / commit abc1234"
+      label: 部署版本 / Deployed Version
+      description: 填写你 Fork 时的 commit SHA 或部署日期 / Commit SHA or deploy date of your fork
+      placeholder: "例如 / e.g. commit abc1234 / 2025-04-13"
     validations:
       required: true
 
   - type: dropdown
     id: deploy_method
     attributes:
-      label: Deploy Method
+      label: 部署方式 / Deploy Method
       options:
-        - Deploy to Cloudflare Button (auto-fork)
-        - Manual (wrangler deploy)
+        - 一键部署按钮 / Deploy to Cloudflare Button
+        - 手动部署 / Manual (wrangler deploy)
     validations:
       required: true
 
   - type: dropdown
     id: ai_enabled
     attributes:
-      label: ENABLE_AI
-      description: Is Workers AI fallback enabled in your config?
+      label: ENABLE_AI 配置 / ENABLE_AI Config
+      description: 是否启用了 Workers AI 兜底 / Is Workers AI fallback enabled?
       options:
         - "true"
         - "false"
@@ -35,7 +41,8 @@ body:
   - type: dropdown
     id: auth_enabled
     attributes:
-      label: REQUIRE_AUTH
+      label: REQUIRE_AUTH 配置 / REQUIRE_AUTH Config
+      description: 是否启用了鉴权 / Is auth enabled?
       options:
         - "false"
         - "true"
@@ -45,30 +52,30 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: Bug Description
-      description: What happened? What did you expect?
+      label: 问题描述 / Bug Description
+      description: 清晰描述发生了什么，期望是什么 / What happened? What did you expect?
       placeholder: |
-        Actual behavior: ...
-        Expected behavior: ...
+        实际行为 / Actual behavior: ...
+        期望行为 / Expected behavior: ...
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: Steps to Reproduce
+      label: 复现步骤 / Steps to Reproduce
       placeholder: |
-        1. Send a registration email to xxx@yourdomain.com
-        2. Call GET /{prefix}/code
-        3. Got ...
+        1. 向 xxx@yourdomain.com 发送注册邮件 / Send a registration email to ...
+        2. 调用 GET /{prefix}/code / Call GET /{prefix}/code
+        3. 观察到 / Got ...
     validations:
       required: true
 
   - type: textarea
     id: logs
     attributes:
-      label: Worker Logs or Response
-      description: Paste relevant output from Cloudflare Workers dashboard logs or curl response.
+      label: Worker 日志或响应内容 / Worker Logs or Response
+      description: 粘贴 Cloudflare Workers 后台日志或 curl 响应 / Paste logs from CF dashboard or curl output
       render: text
     validations:
       required: false
@@ -76,8 +83,8 @@ body:
   - type: input
     id: platform
     attributes:
-      label: Email Source Platform (if relevant)
-      description: Which platform sent the email? e.g. OpenAI, GitHub, custom SMTP
-      placeholder: "e.g. OpenAI / GitHub / custom"
+      label: 邮件来源平台（如有）/ Email Source Platform (if relevant)
+      description: 哪个平台发送的邮件？/ Which platform sent the email?
+      placeholder: "例如 / e.g. OpenAI / GitHub / 自定义 SMTP"
     validations:
       required: false
