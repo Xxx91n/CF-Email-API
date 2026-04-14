@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: README (Chinese)
+    url: https://github.com/Xxx91n/CF-Email-API/blob/main/README.md
+    about: Deployment guide and configuration reference
+  - name: README (English)
+    url: https://github.com/Xxx91n/CF-Email-API/blob/main/README_EN.md
+    about: Deployment guide and configuration reference (EN)

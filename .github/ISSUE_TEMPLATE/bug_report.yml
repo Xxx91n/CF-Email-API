@@ -1,0 +1,83 @@
+name: Bug Report
+description: Report a malfunction or unexpected behavior
+labels: ["bug"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version are you using? Check wrangler.toml or your deployed Worker.
+      placeholder: "e.g. 2025-04-13 / commit abc1234"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deploy_method
+    attributes:
+      label: Deploy Method
+      options:
+        - Deploy to Cloudflare Button (auto-fork)
+        - Manual (wrangler deploy)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ai_enabled
+    attributes:
+      label: ENABLE_AI
+      description: Is Workers AI fallback enabled in your config?
+      options:
+        - "true"
+        - "false"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: auth_enabled
+    attributes:
+      label: REQUIRE_AUTH
+      options:
+        - "false"
+        - "true"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened? What did you expect?
+      placeholder: |
+        Actual behavior: ...
+        Expected behavior: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Send a registration email to xxx@yourdomain.com
+        2. Call GET /{prefix}/code
+        3. Got ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Worker Logs or Response
+      description: Paste relevant output from Cloudflare Workers dashboard logs or curl response.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: platform
+    attributes:
+      label: Email Source Platform (if relevant)
+      description: Which platform sent the email? e.g. OpenAI, GitHub, custom SMTP
+      placeholder: "e.g. OpenAI / GitHub / custom"
+    validations:
+      required: false
