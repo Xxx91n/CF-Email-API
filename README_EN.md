@@ -108,8 +108,30 @@ Now GitHub Actions workflow can reference this secret via `${{ secrets.CLOUDFLAR
 | `DEFAULT_TTL_UNIT` | `seconds` | TTL unit (also supports: minutes, hours, days) |
 | `ENABLE_AI` | `true` | Enable AI fallback extraction |
 | `REQUIRE_AUTH` | `false` | Require authentication |
+| `FILTER_MODE` | `none` | Sender filter mode (none/whitelist/blacklist) |
+| `FILTER_LIST` | `""` | Filter list, comma-separated domains (e.g. `@openai.com,@github.com`) |
 
 > **If REQUIRE_AUTH is true, see [**document**](./REQUIRE_EN.md)**.
+
+### Sender Filter Mode
+
+| Mode | Description | Use Case |
+|------|-------------|----------|
+| `none` | No filter, accept all emails (default) | Debugging, open use |
+| `whitelist` | Only accept emails from listed domains | Limit to specific providers, block spam |
+| `blacklist` | Reject emails from listed domains | Block specific spam sources |
+
+**Configuration Example (wrangler.toml):**
+
+```toml
+# Whitelist mode: only accept OpenAI and Grok emails
+FILTER_MODE = "whitelist"
+FILTER_LIST = "@openai.com,@x.ai"
+
+# Blacklist mode: reject specific domains
+FILTER_MODE = "blacklist"
+FILTER_LIST = "@spam.com,@trash.net"
+```
 
 ## Usage Examples
 

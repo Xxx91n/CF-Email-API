@@ -6,6 +6,8 @@ export interface Env {
   ENABLE_AI: string;
   REQUIRE_AUTH: string;
   AUTH_TOKEN?: string;
+  FILTER_MODE?: string;
+  FILTER_LIST?: string;
 }
 
 export type CodeType = 'numeric' | 'alphanumeric' | 'url_param' | null;

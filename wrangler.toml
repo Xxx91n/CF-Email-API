@@ -11,6 +11,8 @@ DEFAULT_TTL = "600"
 DEFAULT_TTL_UNIT = "seconds"
 ENABLE_AI = "true"
 REQUIRE_AUTH = "false"
+FILTER_MODE = "none"
+FILTER_LIST = ""
 
 [[kv_namespaces]]
 binding = "EMAIL_KV"

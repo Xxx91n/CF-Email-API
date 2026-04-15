@@ -4,6 +4,32 @@ import { extractVerificationCode } from '../services/extractor';
 import { saveEmail } from '../services/storage';
 import { parseTTLConfig } from '../utils/ttl';
 
+function checkSenderFilter(from: string, env: Env): { pass: boolean; reason?: string } {
+  const filterMode = env.FILTER_MODE?.toLowerCase() || 'none';
+  const filterList = env.FILTER_LIST || '';
+
+  if (filterMode === 'none' || !filterList) {
+    return { pass: true };
+  }
+
+  const fromLower = from.toLowerCase();
+  const domains = filterList.split(',').map(d => d.trim().toLowerCase()).filter(d => d);
+
+  if (filterMode === 'whitelist') {
+    const allowed = domains.some(domain => fromLower.endsWith(domain) || fromLower === domain);
+    if (!allowed) {
+      return { pass: false, reason: `Sender ${from} not in whitelist` };
+    }
+  } else if (filterMode === 'blacklist') {
+    const blocked = domains.some(domain => fromLower.endsWith(domain) || fromLower === domain);
+    if (blocked) {
+      return { pass: false, reason: `Sender ${from} in blacklist` };
+    }
+  }
+
+  return { pass: true };
+}
+
 export async function handleEmail(
   message: ForwardableEmailMessage,
   env: Env
@@ -12,6 +38,13 @@ export async function handleEmail(
 
   const prefix = message.to.split('@')[0].toLowerCase();
   console.log(`[email] received for prefix: ${prefix}, from: ${message.from}`);
+
+  const filterResult = checkSenderFilter(message.from, env);
+  if (!filterResult.pass) {
+    console.log(`[email] rejected: ${filterResult.reason}`);
+    message.setReject(filterResult.reason || 'Sender not allowed');
+    return;
+  }
 
   try {
     const parsed = await parseEmail(message);

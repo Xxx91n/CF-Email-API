@@ -107,10 +107,32 @@ npx wrangler deploy
 |------|--------|------|
 | `DEFAULT_TTL` | `600` | 邮件过期时间（秒） |
 | `DEFAULT_TTL_UNIT` | `seconds` | TTL 单位（其余支持的参数：minutes、hours、days） |
-| `ENABLE_AI` | `true` | 是否启用 AI 底底提取 |
+| `ENABLE_AI` | `true` | 是否启用 AI 兜底提取 |
 | `REQUIRE_AUTH` | `false` | 是否需要认证 |
+| `FILTER_MODE` | `none` | 发件人过滤模式（none/whitelist/blacklist） |
+| `FILTER_LIST` | `""` | 过滤列表，逗号分隔的域名（如 `@openai.com,@github.com`） |
 
 >若配置 REQUIRE_AUTH 为 true ，查看后续配置 [**文档**](./REQUIRE.md)
+
+### 发件人过滤模式说明
+
+| 模式 | 说明 | 使用场景 |
+|------|------|----------|
+| `none` | 不过滤，接收所有邮件（默认） | 调试、全开放使用 |
+| `whitelist` | 仅接收列表中域名的邮件 | 限制只接收特定服务商邮件，杜绝垃圾邮件 |
+| `blacklist` | 拒收列表中域名的邮件 | 屏蔽特定垃圾邮件来源 |
+
+**配置示例（wrangler.toml）：**
+
+```toml
+# 白名单模式：只接收 OpenAI 和 Grok 的邮件
+FILTER_MODE = "whitelist"
+FILTER_LIST = "@openai.com,@x.ai"
+
+# 黑名单模式：拒收特定域名
+FILTER_MODE = "blacklist"
+FILTER_LIST = "@spam.com,@trash.net"
+```
 
 
 ## 简易使用示例
