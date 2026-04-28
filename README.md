@@ -135,6 +135,16 @@ FILTER_LIST = "@spam.com,@trash.net"
 ```
 
 
+## 一键部署（适用于 AI Agent）
+
+对你的 Agent 说：
+> 帮我安装并启动 CF Email API，技能文件在 https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
+
+或者手动安装技能：
+```bash
+npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
+```
+
 ## 简易使用示例
 
 ### 注册机集成（Python）

@@ -133,6 +133,16 @@ FILTER_MODE = "blacklist"
 FILTER_LIST = "@spam.com,@trash.net"
 ```
 
+## Quick Deploy (for AI Agents)
+
+Tell your agent:
+> Install and setup CF Email API, skill file at https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
+
+Or install the skill manually:
+```bash
+npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
+```
+
 ## Usage Examples
 
 ### Bot Integration (Python)
