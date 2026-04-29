@@ -5,10 +5,10 @@
 
 <p align="center">
 <a href="https://github.com/Xxx91n/CF-Email-API/blob/main/LICENSE" target="_self">
-<img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+ <img alt="Latest GitHub release" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
 </a>
 <a href="https://workers.cloudflare.com/" target="_self">
-<img alt="Cloudflare Workers" src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" />
+ <img alt="Cloudflare Workers" src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" />
 </a>
 
 A custom domain email verification code API based on Cloudflare Workers + Email Routing, fully relying on free services.
@@ -18,6 +18,16 @@ Designed for personal registration bots/automation scripts, no complex authentic
 *⚠Note: This project is for personal use only, high concurrency scenarios are not supported. Please use it in legal scenarios, the author assumes no legal responsibility!*
 </p>
 </div>
+
+## One-Click Deploy (for AI Agents)
+
+Tell your agent:
+> Install and setup CF Email API, skill file at https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
+
+Or install the skill manually:
+```bash
+npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
+```
 
 ## Features
 
@@ -36,7 +46,9 @@ Designed for personal registration bots/automation scripts, no complex authentic
 | `/{prefix}/code` | GET | Get latest verification code | Plain Text |
 | `/` | GET | Health check | JSON |
 
-## Deployment
+## Manual Deployment
+
+### **Step 1**
 
 ### Option 1: Quick Deploy (Recommended)
 
@@ -78,12 +90,16 @@ npx wrangler kv namespace create EMAIL_KV
 npx wrangler deploy
 ```
 
+### **Step 2**
+
 ### Configure Cloudflare Email Routing
 
 1. Cloudflare Dashboard → Domains → Overview → Add Domain, add your domain, DNS auto-deployed.
 2. Cloudflare Dashboard → Compute → Email → Email Routing → + Onboard Domain.
 3. Select your domain, Routing Rules → Enable **Catch-all**, edit it, Action: **Send to a Worker**, Destination: select deployed `cf-email-api` Worker.
 4. Save
+
+### **Step 3 (Optional)**
 
 ### Configure Auto-Update on Upstream Sync
 
@@ -111,7 +127,7 @@ Now GitHub Actions workflow can reference this secret via `${{ secrets.CLOUDFLAR
 | `FILTER_MODE` | `none` | Sender filter mode (none/whitelist/blacklist) |
 | `FILTER_LIST` | `""` | Filter list, comma-separated domains (e.g. `@openai.com,@github.com`) |
 
-> **If REQUIRE_AUTH is true, see [**document**](./REQUIRE_EN.md)**.
+> If REQUIRE_AUTH is set to true, see the [**document**](./REQUIRE_EN.md)
 
 ### Sender Filter Mode
 
@@ -131,16 +147,6 @@ FILTER_LIST = "@openai.com,@x.ai"
 # Blacklist mode: reject specific domains
 FILTER_MODE = "blacklist"
 FILTER_LIST = "@spam.com,@trash.net"
-```
-
-## Quick Deploy (for AI Agents)
-
-Tell your agent:
-> Install and setup CF Email API, skill file at https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
-
-Or install the skill manually:
-```bash
-npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
 ```
 
 ## Usage Examples
@@ -177,6 +183,7 @@ curl https://your-worker.workers.dev/{prefix}/code
 # Get full email
 curl https://your-worker.workers.dev/{prefix}/email
 ```
+
 
 ## Free Tier Limits
 
