@@ -19,6 +19,15 @@
 </p>
 </div>
 
+## 一键部署（适用于 AI Agent）
+
+对你的 Agent 说：
+> 帮我安装并启动 CF Email API，技能文件在 https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
+
+或者手动安装技能：
+```bash
+npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
+```
 
 ## 功能特性
 
@@ -37,7 +46,9 @@
 | `/{prefix}/code` | GET | 获取最新验证码 | 纯文本 |
 | `/` | GET | 健康检查 | JSON |
 
-## 部署
+## 手动部署
+
+### **第一步**
 
 ### 方式一：快速部署（推荐）
 
@@ -78,6 +89,7 @@ npx wrangler kv namespace create EMAIL_KV
 ```bash
 npx wrangler deploy
 ```
+### **第二步**
 
 ### 配置 cloudflare Email Routing
 
@@ -85,6 +97,8 @@ npx wrangler deploy
 2. Cloudflare Dashboard → 计算 → Email → 电子邮件路由 → + Onboard Domain。
 3. 选择你的域名，Routing Rules → 开启 **Catch-all**，并编辑，操作选择 Action : **Send to a Worker**，Destination 选择已部署的 `cf-email-api` Worker。
 4. 保存
+
+### **第三步（可选）**
 
 ### 配置 同步上游更新时，自动更新你的 Workers
 在 GitHub 仓库中添加 `CLOUDFLARE_API_TOKEN` 
@@ -132,17 +146,6 @@ FILTER_LIST = "@openai.com,@x.ai"
 # 黑名单模式：拒收特定域名
 FILTER_MODE = "blacklist"
 FILTER_LIST = "@spam.com,@trash.net"
-```
-
-
-## 一键部署（适用于 AI Agent）
-
-对你的 Agent 说：
-> 帮我安装并启动 CF Email API，技能文件在 https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
-
-或者手动安装技能：
-```bash
-npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
 ```
 
 ## 简易使用示例
