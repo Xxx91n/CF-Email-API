@@ -1,4 +1,4 @@
-import type { TTLUnit } from '../types';
+﻿import type { TTLUnit } from '../types';
 
 const TTL_MULTIPLIERS: Record<TTLUnit, number> = {
   seconds: 1,
@@ -7,12 +7,15 @@ const TTL_MULTIPLIERS: Record<TTLUnit, number> = {
   days: 86400,
 };
 
+const MAX_TTL = 86400 * 30; // 30 days max
+
 export function calculateTTL(value: number, unit: TTLUnit): number {
   const multiplier = TTL_MULTIPLIERS[unit];
   if (!multiplier) {
     return 600;
   }
-  return value * multiplier;
+  const result = value * multiplier;
+  return Math.min(result, MAX_TTL);
 }
 
 export function parseTTLConfig(ttlStr: string, unitStr: string): number {
@@ -21,7 +24,7 @@ export function parseTTLConfig(ttlStr: string, unitStr: string): number {
     return 600;
   }
 
-  const unit = unitStr as TTLUnit;
+  const unit = unitStr?.toLowerCase() as TTLUnit;
   if (!TTL_MULTIPLIERS[unit]) {
     return 600;
   }

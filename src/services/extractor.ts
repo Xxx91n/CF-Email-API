@@ -1,4 +1,4 @@
-import type { Env, CodeType } from '../types';
+﻿import type { Env, CodeType } from '../types';
 
 export interface ExtractionResult {
   code: string | null;
@@ -34,6 +34,7 @@ const PATTERNS: RegexPattern[] = [
 
 const FALLBACK_PATTERN = /\b([0-9]{6})\b/;
 const AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+const AI_INPUT_MAX_LENGTH = 500;
 
 interface Match {
   code: string;
@@ -90,8 +91,16 @@ function extractAlphanumericCode(text: string): { code: string; confidence: numb
   return candidates.sort((a, b) => b.confidence - a.confidence)[0];
 }
 
+function sanitizeForAI(text: string): string {
+  return text
+    .replace(/[<>{}[\]\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, AI_INPUT_MAX_LENGTH);
+}
+
 async function extractWithAI(text: string, env: Env): Promise<string | null> {
-  const truncated = text.slice(0, 500);
+  const sanitized = sanitizeForAI(text);
 
   const messages = [
     {
@@ -100,7 +109,7 @@ async function extractWithAI(text: string, env: Env): Promise<string | null> {
     },
     {
       role: 'user' as const,
-      content: truncated,
+      content: sanitized,
     },
   ];
 
@@ -118,7 +127,7 @@ async function extractWithAI(text: string, env: Env): Promise<string | null> {
     if (cleaned.length >= 4 && cleaned.length <= 8) return cleaned;
     return null;
   } catch (e) {
-    console.error('[AI extraction failed]', e);
+    console.error('[AI extraction failed]', e instanceof Error ? e.message : 'unknown error');
     return null;
   }
 }

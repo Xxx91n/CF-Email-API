@@ -1,8 +1,16 @@
-import type { Env, EmailData } from '../types';
+﻿import type { Env, EmailData } from '../types';
 import { parseEmail } from '../services/parser';
 import { extractVerificationCode } from '../services/extractor';
 import { saveEmail } from '../services/storage';
 import { parseTTLConfig } from '../utils/ttl';
+
+function sanitizeForLog(input: string): string {
+  return input.replace(/[\r\n\t]/g, '_').slice(0, 200);
+}
+
+function validatePrefix(prefix: string): boolean {
+  return /^[a-z0-9][a-z0-9._-]*$/.test(prefix) && prefix !== '.' && prefix !== '..';
+}
 
 function checkSenderFilter(from: string, env: Env): { pass: boolean; reason?: string } {
   const filterMode = env.FILTER_MODE?.toLowerCase() || 'none';
@@ -16,14 +24,14 @@ function checkSenderFilter(from: string, env: Env): { pass: boolean; reason?: st
   const domains = filterList.split(',').map(d => d.trim().toLowerCase()).filter(d => d);
 
   if (filterMode === 'whitelist') {
-    const allowed = domains.some(domain => fromLower.endsWith(domain) || fromLower === domain);
+    const allowed = domains.some(domain => fromLower.endsWith(`@${domain}`) || fromLower === domain);
     if (!allowed) {
-      return { pass: false, reason: `Sender ${from} not in whitelist` };
+      return { pass: false, reason: 'Sender not in whitelist' };
     }
   } else if (filterMode === 'blacklist') {
-    const blocked = domains.some(domain => fromLower.endsWith(domain) || fromLower === domain);
+    const blocked = domains.some(domain => fromLower.endsWith(`@${domain}`) || fromLower === domain);
     if (blocked) {
-      return { pass: false, reason: `Sender ${from} in blacklist` };
+      return { pass: false, reason: 'Sender blocked' };
     }
   }
 
@@ -36,8 +44,16 @@ export async function handleEmail(
 ): Promise<void> {
   const startTime = Date.now();
 
-  const prefix = message.to.split('@')[0].toLowerCase();
-  console.log(`[email] received for prefix: ${prefix}, from: ${message.from}`);
+  const rawPrefix = message.to.split('@')[0].toLowerCase();
+  const prefix = rawPrefix.replace(/[^a-z0-9._-]/g, '');
+
+  if (!prefix || !validatePrefix(prefix)) {
+    console.warn(`[email] invalid prefix rejected: ${sanitizeForLog(rawPrefix)}`);
+    message.setReject('Invalid recipient prefix');
+    return;
+  }
+
+  console.log(`[email] received for prefix: ${sanitizeForLog(prefix)}, from: ${sanitizeForLog(message.from)}`);
 
   const filterResult = checkSenderFilter(message.from, env);
   if (!filterResult.pass) {
@@ -71,8 +87,8 @@ export async function handleEmail(
     await saveEmail(env.EMAIL_KV, prefix, emailData, ttl);
 
     const duration = Date.now() - startTime;
-    console.log(`[email] saved prefix=${prefix} code=${code ?? 'null'} type=${codeType} conf=${confidence} ttl=${ttl}s duration=${duration}ms`);
+    console.log(`[email] saved prefix=${sanitizeForLog(prefix)} code=${code ?? 'null'} type=${codeType} conf=${confidence} ttl=${ttl}s duration=${duration}ms`);
   } catch (err) {
-    console.error(`[email] error processing prefix=${prefix}:`, err);
+    console.error(`[email] error processing prefix=${sanitizeForLog(prefix)}:`, err instanceof Error ? err.message : 'unknown error');
   }
 }

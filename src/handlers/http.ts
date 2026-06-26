@@ -1,5 +1,6 @@
-import { Hono } from 'hono';
+﻿import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { secureHeaders } from 'hono/secure-headers';
 import type { Env, ErrorResponse } from '../types';
 import { ErrorCode } from '../types';
 import { authMiddleware } from '../middleware/auth';
@@ -7,33 +8,31 @@ import { getEmail, getCode } from '../services/storage';
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.use('/*', cors());
+app.use('/*', secureHeaders());
+app.use('/*', cors({
+  origin: '*',
+  allowMethods: ['GET'],
+  allowHeaders: ['Authorization', 'Content-Type'],
+  maxAge: 86400,
+}));
 app.use('/*', authMiddleware);
 
 app.get('/', (c) => c.json({ status: 'ok', ts: new Date().toISOString() }));
 
+function validatePrefix(prefix: string): boolean {
+  return /^[a-z0-9][a-z0-9._-]*$/.test(prefix) && prefix.length >= 1 && prefix !== '.' && prefix !== '..';
+}
+
 app.get('/:prefix/email', async (c) => {
   const prefix = c.req.param('prefix').toLowerCase();
 
-  if (!prefix || !/^[a-z0-9._+-]+$/.test(prefix)) {
-    const err: ErrorResponse = {
-      error: ErrorCode.INVALID_PREFIX,
-      prefix,
-      message: 'Invalid email prefix format',
-      timestamp: new Date().toISOString(),
-    };
-    return c.json(err, 400);
+  if (!prefix || !validatePrefix(prefix)) {
+    return c.json({ error: ErrorCode.INVALID_PREFIX, message: 'Invalid prefix' }, 400);
   }
 
   const emailData = await getEmail(c.env.EMAIL_KV, prefix);
   if (!emailData) {
-    const err: ErrorResponse = {
-      error: ErrorCode.NO_EMAIL_FOUND,
-      prefix,
-      message: `No email found for prefix: ${prefix}`,
-      timestamp: new Date().toISOString(),
-    };
-    return c.json(err, 404);
+    return c.json({ error: ErrorCode.NO_EMAIL_FOUND, message: 'No email found' }, 404);
   }
 
   return c.json(emailData);
@@ -42,25 +41,13 @@ app.get('/:prefix/email', async (c) => {
 app.get('/:prefix/code', async (c) => {
   const prefix = c.req.param('prefix').toLowerCase();
 
-  if (!prefix || !/^[a-z0-9._+-]+$/.test(prefix)) {
-    const err: ErrorResponse = {
-      error: ErrorCode.INVALID_PREFIX,
-      prefix,
-      message: 'Invalid email prefix format',
-      timestamp: new Date().toISOString(),
-    };
-    return c.json(err, 400);
+  if (!prefix || !validatePrefix(prefix)) {
+    return c.json({ error: ErrorCode.INVALID_PREFIX, message: 'Invalid prefix' }, 400);
   }
 
   const code = await getCode(c.env.EMAIL_KV, prefix);
   if (!code) {
-    const err: ErrorResponse = {
-      error: ErrorCode.NO_CODE_FOUND,
-      prefix,
-      message: `No verification code found for prefix: ${prefix}`,
-      timestamp: new Date().toISOString(),
-    };
-    return c.json(err, 404);
+    return c.json({ error: ErrorCode.NO_CODE_FOUND, message: 'No code found' }, 404);
   }
 
   return c.text(code);
