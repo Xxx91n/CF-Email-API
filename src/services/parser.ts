@@ -31,15 +31,19 @@ export async function parseEmail(message: ForwardableEmailMessage): Promise<Pars
   const chunks: Uint8Array[] = [];
   let totalSize = 0;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    totalSize += value.length;
-    if (totalSize > MAX_EMAIL_SIZE) {
-      console.warn('[parser] email exceeds max size, truncating');
-      break;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      totalSize += value.length;
+      if (totalSize > MAX_EMAIL_SIZE) {
+        console.warn('[parser] email exceeds max size, truncating');
+        break;
+      }
+      chunks.push(value);
     }
-    chunks.push(value);
+  } finally {
+    reader.releaseLock();
   }
 
   const limitedStream = new ReadableStream({
