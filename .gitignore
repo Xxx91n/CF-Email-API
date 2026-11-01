@@ -36,3 +36,6 @@ coverage/
 
 # VS Code workspace file
 *.code-workspace
+
+# Local tool state (CodeGraph database, daemon, logs)
+.codegraph/
