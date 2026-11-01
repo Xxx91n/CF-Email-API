@@ -13,7 +13,7 @@ ENABLE_AI = "true"
 REQUIRE_AUTH = "false"
 FILTER_MODE = "none"
 FILTER_LIST = ""
-# AUTH_TOKEN is a secret, not a var: run "wrangler secret put AUTH_TOKEN"
+# AUTH_TOKEN is a secret, not a var: run "npx wrangler secret put AUTH_TOKEN"
 # when REQUIRE_AUTH is "true" (a same-named [vars] entry would replace the
 # secret on deploy)
 
