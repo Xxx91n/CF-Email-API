@@ -43,7 +43,9 @@ export async function getCode(
 ): Promise<string | null> {
   const safePrefix = sanitizePrefix(prefix);
   const key = `${CODE_KEY_PREFIX}${safePrefix}`;
-  return await kv.get(key);
+  const value = await kv.get(key);
+  // Empty string means no code was extracted; treat as null
+  return value || null;
 }
 
 export async function deleteEmail(
