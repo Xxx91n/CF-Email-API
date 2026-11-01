@@ -1,11 +1,9 @@
 ﻿import type { EmailData } from '../types';
+import { sanitizePrefix } from '../utils/prefix';
 
 const EMAIL_KEY_PREFIX = 'email:';
 const CODE_KEY_PREFIX = 'code:';
 
-function sanitizePrefix(prefix: string): string {
-  return prefix.replace(/[^a-z0-9._-]/g, '').slice(0, 100);
-}
 
 export async function saveEmail(
   kv: KVNamespace,
