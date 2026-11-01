@@ -10,7 +10,7 @@ REQUIRE_AUTH = "true"
 
 **2. 通过 Secret 设置 Token（加密存储）**
 ```bash
-wrangler secret put AUTH_TOKEN
+npx wrangler secret put AUTH_TOKEN
 # 输入你的 Token，例如：cf-114514-ff
 或者
 Cloudflare Dashboard → 计算 → Workers & Pages → cf-email-api → 设置 → 变量和机密
@@ -19,13 +19,6 @@ Cloudflare Dashboard → 计算 → Workers & Pages → cf-email-api → 设置 
 
 **3. 注册机调用方式**
 ```python
-# 方式一：URL 参数
-code = requests.get(
-    "https://xxx.workers.dev/random123/code",
-    params={"token": "cf_mail_s3cr3t_2026"}
-).text
-
-# 方式二：Header
 code = requests.get(
     "https://xxx.workers.dev/random123/code",
     headers={"Authorization": "Bearer cf_mail_s3cr3t_2026"}
@@ -50,24 +43,28 @@ if (!requireAuth) return next(); // 直接放行
 
 ```typescript
 const authToken = c.env.AUTH_TOKEN;
-if (!authToken) return next(); // 兜底：Token 未配置也放行
+if (!authToken) {
+  // 兜底：Token 未配置直接拒绝（fail-closed）
+  return c.json(
+    { error: 'unauthorized', message: 'Authentication not configured' },
+    500
+  );
+}
 ```
 
-即使 `REQUIRE_AUTH = "true"`，如果你**没有通过 `wrangler secret put AUTH_TOKEN` 设置 Token**，请求依然会被放行。这是一个安全兜底设计，防止锁死自己。
+即使 `REQUIRE_AUTH = "true"`，如果你**没有通过 `npx wrangler secret put AUTH_TOKEN` 设置 Token**，所有请求都会返回 **HTTP 500 "Authentication not configured"**。中间件是 **fail-closed**：密钥未配置时不会放行任何流量。
 
 ### 第三步：校验请求携带的 Token
 
 ```typescript
 const providedToken =
-  c.req.query('token') ||
   c.req.header('Authorization')?.replace('Bearer ', '');
 ```
 
-支持两种传 Token 方式（**二选一即可**）：
+只支持一种传 Token 方式：
 
 | 方式 | 示例 |
 |------|------|
-| **URL 查询参数** | `GET /random123/code?token=你的TOKEN` |
 | **HTTP Header** | `Authorization: Bearer 你的TOKEN` |
 
 Token 不匹配或缺失时，返回 **HTTP 401**：
