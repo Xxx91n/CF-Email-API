@@ -5,7 +5,7 @@
 
 <p align="center">
 <a href="https://github.com/Xxx91n/CF-Email-API/blob/main/LICENSE" target="_self">
- <img alt="Latest GitHub release" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+ <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
 </a>
 <a href="https://workers.cloudflare.com/" target="_self">
  <img alt="Cloudflare Workers" src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" />
@@ -22,9 +22,11 @@ Designed for personal registration bots/automation scripts, no complex authentic
 ## One-Click Deploy (for AI Agents)
 
 Tell your agent:
+
 > Install and setup CF Email API, skill file at https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
 
 Or install the skill manually:
+
 ```bash
 npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
 ```
@@ -33,10 +35,10 @@ npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-
 
 - Receive all emails via catch-all rule `*@yourdomain.com`
 - Regex + AI hybrid verification code extraction (supports Chinese/English/Japanese/Korean)
-- Simple HTTP API, no complex authentication
+- Minimal HTTP API, no complex authentication
 - Configurable TTL, automatic expiration cleanup
 - KV storage, free tier can handle ~500 emails/day
-- Workers AI intelligent fallback, improves verification code extraction accuracy
+- Workers AI fallback extraction when the regex misses
 
 ## API Endpoints
 
@@ -46,9 +48,9 @@ npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-
 | `/{prefix}/code` | GET | Get latest verification code | Plain Text |
 | `/` | GET | Health check | JSON |
 
-## Manual Deployment
+> Prefixes accept lowercase letters, digits, and `._-`, and must start with a letter or digit; anything else returns 400 (`invalid_prefix`).
 
-### **Step 1**
+## Manual Deployment
 
 ### Option 1: Quick Deploy (Recommended)
 
@@ -61,9 +63,9 @@ Click the button below to auto-fork and deploy:
 EMAIL_KV
 ```
 
-### Option 2: Manual Deploy
+### Option 2: Step-by-step Deploy
 
-#### 1. Clone Project
+1. Clone the project:
 
 ```bash
 git clone https://github.com/Xxx91n/CF-Email-API.git
@@ -71,41 +73,37 @@ cd CF-Email-API
 npm install
 ```
 
-#### 2. Login to Cloudflare
+2. Log in to Cloudflare:
 
 ```bash
 npx wrangler login
 ```
 
-#### 3. Create KV Namespace
+3. Create the KV namespace:
 
 ```bash
 npx wrangler kv namespace create EMAIL_KV
 # Put the output id into wrangler.toml, customize parameters as needed
 ```
 
-#### 4. Deploy
+4. Deploy:
 
 ```bash
 npx wrangler deploy
 ```
 
-### **Step 2**
-
-### Configure Cloudflare Email Routing
+## Configure Cloudflare Email Routing
 
 1. Cloudflare Dashboard → Domains → Overview → Add Domain, add your domain, DNS auto-deployed.
 2. Cloudflare Dashboard → Compute → Email → Email Routing → + Onboard Domain.
 3. Select your domain, Routing Rules → Enable **Catch-all**, edit it, Action: **Send to a Worker**, Destination: select deployed `cf-email-api` Worker.
 4. Save
 
-### **Step 3 (Optional)**
+## Auto-Update Deployment (Optional)
 
-### Configure Auto-Update on Upstream Sync
+GitHub Actions redeploys the Worker on every push to main (`.github/workflows/ci.yml`); you only need to add `CLOUDFLARE_API_TOKEN` once:
 
-Add `CLOUDFLARE_API_TOKEN` in GitHub repository:
-
-1. Login to [**Cloudflare Dashboard**](https://dash.cloudflare.com/), select "[**API Tokens**](https://dash.cloudflare.com/profile/api-tokens)" tab, click "Create Token".
+1. Log in to [**Cloudflare Dashboard**](https://dash.cloudflare.com/), select "[**API Tokens**](https://dash.cloudflare.com/profile/api-tokens)" tab, click "Create Token".
 2. Use template "Edit Cloudflare Workers", ensure permission `Account.Workers Scripts:Edit`, resource limits: "All accounts" and "All zones", then create token.
 3. Copy the generated API token (shown only once, save it securely).
 4. Open GitHub repository page, go to **Settings > Secrets and variables > Actions**.
@@ -125,7 +123,7 @@ Now GitHub Actions workflow can reference this secret via `${{ secrets.CLOUDFLAR
 | `ENABLE_AI` | `true` | Enable AI fallback extraction |
 | `REQUIRE_AUTH` | `false` | Require authentication |
 | `FILTER_MODE` | `none` | Sender filter mode (none/whitelist/blacklist) |
-| `FILTER_LIST` | `""` | Filter list, comma-separated domains (e.g. `@openai.com,@github.com`) |
+| `FILTER_LIST` | `""` | Filter list, comma-separated sender domains (e.g. `openai.com,github.com`) |
 
 > If REQUIRE_AUTH is set to true, see the [**document**](./REQUIRE_EN.md)
 
@@ -142,11 +140,11 @@ Now GitHub Actions workflow can reference this secret via `${{ secrets.CLOUDFLAR
 ```toml
 # Whitelist mode: only accept OpenAI and Grok emails
 FILTER_MODE = "whitelist"
-FILTER_LIST = "@openai.com,@x.ai"
+FILTER_LIST = "openai.com,x.ai"
 
 # Blacklist mode: reject specific domains
 FILTER_MODE = "blacklist"
-FILTER_LIST = "@spam.com,@trash.net"
+FILTER_LIST = "spam.com,trash.net"
 ```
 
 ## Usage Examples
@@ -196,6 +194,12 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 > For higher throughput, upgrade to Workers Paid ($5/month), write limit becomes 1M/month
 
+### Known Limitations
+
+- Free tier handles ~500 emails/day (2 KV writes per email)
+- AI fallback extracts only 4-8 digit numeric codes; alphanumeric codes rely on regex matching
+- TTL is capped at 30 days
+
 ## Supported Verification Code Formats
 
 ### Numeric Codes
@@ -215,11 +219,6 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 ### AI Semantic Fallback
 - Workers AI automatically extracts when regex fails
-
-## Verified Platforms
-
-- OpenAI
-- Grok
 
 ## Tech Stack
 
