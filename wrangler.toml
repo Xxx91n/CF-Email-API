@@ -13,8 +13,9 @@ ENABLE_AI = "true"
 REQUIRE_AUTH = "false"
 FILTER_MODE = "none"
 FILTER_LIST = ""
-# Set AUTH_TOKEN when REQUIRE_AUTH is "true" to enable API authentication
-AUTH_TOKEN = ""
+# AUTH_TOKEN is a secret, not a var: run "wrangler secret put AUTH_TOKEN"
+# when REQUIRE_AUTH is "true" (a same-named [vars] entry would replace the
+# secret on deploy)
 
 [[kv_namespaces]]
 binding = "EMAIL_KV"
