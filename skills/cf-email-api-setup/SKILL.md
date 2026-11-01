@@ -4,7 +4,7 @@ description: "Use when setting up, deploying, or configuring the CF Email API pr
 compatibility:
   - OS: macOS, Linux, Windows
   - Node.js: ">=18"
-  - Wrangler: ">=3"
+  - Wrangler: ">=4"
   - Cloudflare Account with Email Routing enabled
 allowed-tools:
   - Bash
@@ -120,21 +120,22 @@ npx wrangler deploy
 | `DEFAULT_TTL_UNIT` | `seconds` | TTL unit: `seconds`, `minutes`, `hours`, `days` |
 | `ENABLE_AI` | `true` | Enable AI fallback for code extraction |
 | `REQUIRE_AUTH` | `false` | Require API token for access |
+| `AUTH_TOKEN` | not set | API authentication token; set with `npx wrangler secret put AUTH_TOKEN` (required when `REQUIRE_AUTH` = `true`) |
 | `FILTER_MODE` | `none` | Filter mode: `none`, `whitelist`, `blacklist` |
-| `FILTER_LIST` | `""` | Comma-separated domains (e.g., `@openai.com,@github.com`) |
+| `FILTER_LIST` | `""` | Comma-separated domains (e.g., `openai.com,github.com`) |
 
 ### Filter Mode Examples
 
 **Whitelist (only accept from listed domains):**
 ```toml
 FILTER_MODE = "whitelist"
-FILTER_LIST = "@openai.com,@github.com,@x.ai"
+FILTER_LIST = "openai.com,github.com,x.ai"
 ```
 
 **Blacklist (block listed domains):**
 ```toml
 FILTER_MODE = "blacklist"
-FILTER_LIST = "@spam.com,@trash.net"
+FILTER_LIST = "spam.com,trash.net"
 ```
 
 ## Common Mistakes
@@ -153,6 +154,7 @@ FILTER_LIST = "@spam.com,@trash.net"
 - **Email Delay**: Cloudflare Email Routing may take 5-15 seconds to deliver.
 - **AI Fallback**: Uses `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Free tier = 10,000 inferences/day.
 - **Domain Required**: You MUST own a domain added to Cloudflare. Cannot use `workers.dev` subdomain for email.
+- **Auth Misconfiguration**: When `REQUIRE_AUTH=true`, set the token as a secret with `npx wrangler secret put AUTH_TOKEN`; do not put it in `[vars]` — a same-named var replaces the secret on deploy. A missing token blocks all API requests with HTTP 500.
 - **Email Routing Setup**: Must complete domain onboarding (MX records) before Catch-all works.
 
 ## API Usage

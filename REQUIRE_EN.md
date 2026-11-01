@@ -14,7 +14,7 @@ REQUIRE_AUTH = "true"
 **2. Set the Token via Wrangler Secret (Encrypted Storage)**
 
 ```bash
-wrangler secret put AUTH_TOKEN
+npx wrangler secret put AUTH_TOKEN
 # Enter your token when prompted, e.g.: cf-114514-ff
 ```
 
@@ -27,13 +27,6 @@ Alternatively, configure it via the Cloudflare Dashboard:
 **3. Client Integration Example**
 
 ```python
-# Method 1: URL query parameter
-code = requests.get(
-    "https://xxx.workers.dev/random123/code",
-    params={"token": "cf_mail_s3cr3t_2026"}
-).text
-
-# Method 2: Authorization header
 code = requests.get(
     "https://xxx.workers.dev/random123/code",
     headers={"Authorization": "Bearer cf_mail_s3cr3t_2026"}
@@ -59,24 +52,28 @@ Authentication is only enforced when `REQUIRE_AUTH` is explicitly set to `"true"
 
 ```typescript
 const authToken = c.env.AUTH_TOKEN;
-if (!authToken) return next(); // Fail-open: allow requests if secret is not set
+if (!authToken) {
+  // Fail-closed: every request fails until the secret is provisioned
+  return c.json(
+    { error: 'unauthorized', message: 'Authentication not configured' },
+    500
+  );
+}
 ```
 
-Even when `REQUIRE_AUTH = "true"`, if `AUTH_TOKEN` has **not been provisioned via `wrangler secret put AUTH_TOKEN`**, requests will still pass through. This is an intentional **fail-open** safety mechanism to prevent accidental self-lockout.
+Even when `REQUIRE_AUTH = "true"`, if `AUTH_TOKEN` has **not been provisioned via `npx wrangler secret put AUTH_TOKEN`**, every request fails with **HTTP 500 "Authentication not configured"**. The middleware is **fail-closed**: it never serves traffic while the secret is missing.
 
 ### Step 3: Validate the Token Provided by the Client
 
 ```typescript
 const providedToken =
-  c.req.query('token') ||
   c.req.header('Authorization')?.replace('Bearer ', '');
 ```
 
-Two token delivery methods are supported (**use either one**):
+Only one token delivery method is supported:
 
 | Method | Example |
 |--------|---------|
-| **URL Query Parameter** | `GET /random123/code?token=YOUR_TOKEN` |
 | **HTTP Authorization Header** | `Authorization: Bearer YOUR_TOKEN` |
 
 If the token is missing or does not match, the Worker returns **HTTP 401 Unauthorized**:

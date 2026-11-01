@@ -3,14 +3,12 @@ import { parseEmail } from '../services/parser';
 import { extractVerificationCode } from '../services/extractor';
 import { saveEmail } from '../services/storage';
 import { parseTTLConfig } from '../utils/ttl';
+import { validatePrefix } from '../utils/prefix';
 
 function sanitizeForLog(input: string): string {
   return input.replace(/[\r\n\t]/g, '_').slice(0, 200);
 }
 
-function validatePrefix(prefix: string): boolean {
-  return /^[a-z0-9][a-z0-9._-]*$/.test(prefix) && prefix !== '.' && prefix !== '..';
-}
 
 function checkSenderFilter(from: string, env: Env): { pass: boolean; reason?: string } {
   const filterMode = env.FILTER_MODE?.toLowerCase() || 'none';

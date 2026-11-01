@@ -52,7 +52,7 @@ function selectBestMatch(matches: Match[]): string | null {
   if (contextualMatches.length === 1) return contextualMatches[0].code;
 
   if (contextualMatches.length > 1) {
-    return contextualMatches.sort((a, b) => a.index - b.index)[0].code;
+    return [...contextualMatches].sort((a, b) => a.index - b.index)[0].code;
   }
 
   const uniqueCodes = [...new Set(matches.map(m => m.code))];
@@ -88,7 +88,7 @@ function extractAlphanumericCode(text: string): { code: string; confidence: numb
 
   if (candidates.length === 0) return null;
 
-  return candidates.sort((a, b) => b.confidence - a.confidence)[0];
+  return [...candidates].sort((a, b) => b.confidence - a.confidence)[0];
 }
 
 function sanitizeForAI(text: string): string {
@@ -113,22 +113,36 @@ async function extractWithAI(text: string, env: Env): Promise<string | null> {
     },
   ];
 
-  try {
-    const response = await env.AI.run(AI_MODEL, {
-      messages,
-      max_tokens: 16,
-      temperature: 0,
-    }) as { response: string };
+  const AI_TIMEOUT_MS = 10000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
-    const output = response?.response?.trim();
+  try {
+    const response = (await env.AI.run(
+      AI_MODEL,
+      {
+        messages,
+        max_tokens: 16,
+        temperature: 0,
+      },
+      { signal: controller.signal }
+    )) as { response?: string };
+
+    const output = response.response?.trim();
     if (!output || output === 'NONE') return null;
 
     const cleaned = output.replace(/\D/g, '');
     if (cleaned.length >= 4 && cleaned.length <= 8) return cleaned;
     return null;
   } catch (e) {
-    console.error('[AI extraction failed]', e instanceof Error ? e.message : 'unknown error');
+    if (controller.signal.aborted) {
+      console.warn('[extractor] AI extraction timed out');
+    } else {
+      console.error('[AI extraction failed]', e);
+    }
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

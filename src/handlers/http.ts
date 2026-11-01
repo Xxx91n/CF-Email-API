@@ -1,10 +1,11 @@
-﻿import { Hono } from 'hono';
+import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
-import type { Env, ErrorResponse } from '../types';
+import type { Env } from '../types';
 import { ErrorCode } from '../types';
 import { authMiddleware } from '../middleware/auth';
 import { getEmail, getCode } from '../services/storage';
+import { validatePrefix } from '../utils/prefix';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -19,9 +20,6 @@ app.use('/*', authMiddleware);
 
 app.get('/', (c) => c.json({ status: 'ok', ts: new Date().toISOString() }));
 
-function validatePrefix(prefix: string): boolean {
-  return /^[a-z0-9][a-z0-9._-]*$/.test(prefix) && prefix.length >= 1 && prefix !== '.' && prefix !== '..';
-}
 
 app.get('/:prefix/email', async (c) => {
   const prefix = c.req.param('prefix').toLowerCase();
