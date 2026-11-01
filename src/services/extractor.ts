@@ -113,23 +113,20 @@ async function extractWithAI(text: string, env: Env): Promise<string | null> {
     },
   ];
 
+  const AI_TIMEOUT_MS = 10000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
   try {
-    const AI_TIMEOUT_MS = 10000;
-    const aiPromise = env.AI.run(AI_MODEL, {
-      messages,
-      max_tokens: 16,
-      temperature: 0,
-    }) as Promise<{ response: string }>;
-
-    const timeoutPromise = new Promise<null>((resolve) =>
-      setTimeout(() => resolve(null), AI_TIMEOUT_MS)
-    );
-
-    const response = await Promise.race([aiPromise, timeoutPromise]);
-    if (!response) {
-      console.warn('[extractor] AI extraction timed out');
-      return null;
-    }
+    const response = (await env.AI.run(
+      AI_MODEL,
+      {
+        messages,
+        max_tokens: 16,
+        temperature: 0,
+      },
+      { signal: controller.signal }
+    )) as { response?: string };
 
     const output = response.response?.trim();
     if (!output || output === 'NONE') return null;
@@ -138,8 +135,14 @@ async function extractWithAI(text: string, env: Env): Promise<string | null> {
     if (cleaned.length >= 4 && cleaned.length <= 8) return cleaned;
     return null;
   } catch (e) {
-    console.error('[AI extraction failed]', e);
+    if (controller.signal.aborted) {
+      console.warn('[extractor] AI extraction timed out');
+    } else {
+      console.error('[AI extraction failed]', e);
+    }
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
