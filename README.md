@@ -28,7 +28,7 @@
 或者手动安装技能：
 
 ```bash
-npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
+npx skills@1 add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
 ```
 
 ## 功能特性
@@ -76,20 +76,20 @@ npm install
 2. 登录 Cloudflare：
 
 ```bash
-npx wrangler login
+npx wrangler@4 login
 ```
 
 3. 创建 KV Namespace：
 
 ```bash
-npx wrangler kv namespace create EMAIL_KV
+npx wrangler@4 kv namespace create EMAIL_KV
 # 将输出的 id 填入 wrangler.toml，同时可自定义修改参数
 ```
 
 4. 部署：
 
 ```bash
-npx wrangler deploy
+npx wrangler@4 deploy
 ```
 
 ## 配置 Email Routing

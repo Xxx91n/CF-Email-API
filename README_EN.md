@@ -28,7 +28,7 @@ Tell your agent:
 Or install the skill manually:
 
 ```bash
-npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
+npx skills@1 add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
 ```
 
 ## Features
@@ -76,20 +76,20 @@ npm install
 2. Log in to Cloudflare:
 
 ```bash
-npx wrangler login
+npx wrangler@4 login
 ```
 
 3. Create the KV namespace:
 
 ```bash
-npx wrangler kv namespace create EMAIL_KV
+npx wrangler@4 kv namespace create EMAIL_KV
 # Put the output id into wrangler.toml, customize parameters as needed
 ```
 
 4. Deploy:
 
 ```bash
-npx wrangler deploy
+npx wrangler@4 deploy
 ```
 
 ## Configure Cloudflare Email Routing
