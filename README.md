@@ -104,7 +104,7 @@ npx wrangler deploy
 GitHub Actions 在每次推送到 main 分支后自动重新部署 Worker（`.github/workflows/ci.yml`），只需添加一次 `CLOUDFLARE_API_TOKEN`：
 
 1. 登录 [**dash Cloudflare**](https://dash.cloudflare.com/) ，选择 "[**API 令牌**](https://dash.cloudflare.com/profile/api-tokens)" 选项卡，点击 "创建令牌"。
-2. 使用模板"编辑 Cloudflare Workers"，确保权限 `Account.Workers Scripts:Edit`，资源限制选择"所有账户"和"所有区域"，然后创建令牌。
+2. 使用模板"编辑 Cloudflare Workers"，确保权限 `Account.Workers Scripts:Edit`，资源限制仅选择部署该 Worker 的账户，区域不要选"所有区域"，然后创建令牌。
 3. 复制生成的 API 令牌（仅显示一次，请妥善保存）。
 4. 打开 GitHub 仓库页面，进入 **Settings > Secrets and variables > Actions**。
 5. 点击右侧 **New repository secret** 按钮。

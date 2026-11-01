@@ -104,7 +104,7 @@ npx wrangler deploy
 GitHub Actions redeploys the Worker on every push to main (`.github/workflows/ci.yml`); you only need to add `CLOUDFLARE_API_TOKEN` once:
 
 1. Log in to [**Cloudflare Dashboard**](https://dash.cloudflare.com/), select "[**API Tokens**](https://dash.cloudflare.com/profile/api-tokens)" tab, click "Create Token".
-2. Use template "Edit Cloudflare Workers", ensure permission `Account.Workers Scripts:Edit`, resource limits: "All accounts" and "All zones", then create token.
+2. Use template "Edit Cloudflare Workers", ensure permission `Account.Workers Scripts:Edit`, resource limits: only the account that hosts the Worker; do not select "All zones", then create token.
 3. Copy the generated API token (shown only once, save it securely).
 4. Open GitHub repository page, go to **Settings > Secrets and variables > Actions**.
 5. Click **New repository secret** button.
