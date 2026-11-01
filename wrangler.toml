@@ -13,6 +13,8 @@ ENABLE_AI = "true"
 REQUIRE_AUTH = "false"
 FILTER_MODE = "none"
 FILTER_LIST = ""
+# Set AUTH_TOKEN when REQUIRE_AUTH is "true" to enable API authentication
+AUTH_TOKEN = ""
 
 [[kv_namespaces]]
 binding = "EMAIL_KV"
