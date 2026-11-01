@@ -5,7 +5,7 @@
 
 <p align="center">
 <a href="https://github.com/Xxx91n/CF-Email-API/blob/main/LICENSE" target="_self">
- <img alt="Latest GitHub release" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
+ <img alt="MIT License" src="https://img.shields.io/badge/License-MIT-yellow.svg" />
 </a>
 <a href="https://workers.cloudflare.com/" target="_self">
  <img alt="Cloudflare Workers" src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" />
@@ -22,9 +22,11 @@
 ## 一键部署（适用于 AI Agent）
 
 对你的 Agent 说：
+
 > 帮我安装并启动 CF Email API，技能文件在 https://raw.githubusercontent.com/Xxx91n/CF-Email-API/main/skills/cf-email-api-setup/SKILL.md
 
 或者手动安装技能：
+
 ```bash
 npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-api-setup
 ```
@@ -36,7 +38,7 @@ npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-
 - 极简 HTTP API，无需复杂认证
 - 可配置 TTL，自动过期清理
 - KV 存储，免费额度每天可处理 ~500 封邮件
-- Workers AI 智能兜底，提高验证码提取准确率
+- 正则未命中时由 Workers AI 兜底提取
 
 ## API 端点
 
@@ -46,9 +48,9 @@ npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-
 | `/{prefix}/code` | GET | 获取最新验证码 | 纯文本 |
 | `/` | GET | 健康检查 | JSON |
 
-## 手动部署
+> 前缀只支持小写字母、数字和 `._-`，且必须以字母或数字开头，否则返回 400（`invalid_prefix`）。
 
-### **第一步**
+## 手动部署
 
 ### 方式一：快速部署（推荐）
 
@@ -61,9 +63,9 @@ npx skills add https://github.com/Xxx91n/CF-Email-API/tree/main/skills/cf-email-
 EMAIL_KV
 ```
 
-### 方式二：手动部署
+### 方式二：逐步部署
 
-#### 1. 克隆项目
+1. 克隆项目：
 
 ```bash
 git clone https://github.com/Xxx91n/CF-Email-API.git
@@ -71,51 +73,48 @@ cd CF-Email-API
 npm install
 ```
 
-#### 2. 登录 Cloudflare
+2. 登录 Cloudflare：
 
 ```bash
 npx wrangler login
 ```
 
-#### 3. 创建 KV Namespace
+3. 创建 KV Namespace：
 
 ```bash
 npx wrangler kv namespace create EMAIL_KV
 # 将输出的 id 填入 wrangler.toml，同时可自定义修改参数
 ```
 
-#### 4. 部署
+4. 部署：
 
 ```bash
 npx wrangler deploy
 ```
-### **第二步**
 
-### 配置 cloudflare Email Routing
+## 配置 Email Routing
 
 1. Cloudflare Dashboard → Domains → Overview → 添加域，添加你的域名，并自动部署DNS。
 2. Cloudflare Dashboard → 计算 → Email → 电子邮件路由 → + Onboard Domain。
 3. 选择你的域名，Routing Rules → 开启 **Catch-all**，并编辑，操作选择 Action : **Send to a Worker**，Destination 选择已部署的 `cf-email-api` Worker。
 4. 保存
 
-### **第三步（可选）**
+## 自动更新部署（可选）
 
-### 配置 同步上游更新时，自动更新你的 Workers
-在 GitHub 仓库中添加 `CLOUDFLARE_API_TOKEN` 
+GitHub Actions 在每次推送到 main 分支后自动重新部署 Worker（`.github/workflows/ci.yml`），只需添加一次 `CLOUDFLARE_API_TOKEN`：
 
-1. 登录 [**dash Cloudflare**](https://dash.cloudflare.com/) ，选择 "[**API 令牌**](https://dash.cloudflare.com/profile/api-tokens)" 选项卡，点击 "创建令牌" 。
-3. 使用模板"编辑 Cloudflare Workers"，确保权限 `Account.Workers Scripts:Edit`，资源限制选择"所有账户"和"所有区域"，然后创建令牌。
-4. 复制生成的 API 令牌（仅显示一次，请妥善保存）。
-5. 打开 GitHub 仓库页面，进入 **Settings > Secrets and variables > Actions**。
-6. 点击右侧 **New repository secret** 按钮。
-7. 在 **Name** 输入框中输入 `CLOUDFLARE_API_TOKEN`（名称需与部署脚本中引用的一致）。
-8. 在 **Secret** 输入框中粘贴之前复制的 Cloudflare API 令牌。
-9. 点击 **Add secret** 完成添加。 
+1. 登录 [**dash Cloudflare**](https://dash.cloudflare.com/) ，选择 "[**API 令牌**](https://dash.cloudflare.com/profile/api-tokens)" 选项卡，点击 "创建令牌"。
+2. 使用模板"编辑 Cloudflare Workers"，确保权限 `Account.Workers Scripts:Edit`，资源限制仅选择部署该 Worker 的账户，区域不要选"所有区域"，然后创建令牌。
+3. 复制生成的 API 令牌（仅显示一次，请妥善保存）。
+4. 打开 GitHub 仓库页面，进入 **Settings > Secrets and variables > Actions**。
+5. 点击右侧 **New repository secret** 按钮。
+6. 在 **Name** 输入框中输入 `CLOUDFLARE_API_TOKEN`（名称需与部署脚本中引用的一致）。
+7. 在 **Secret** 输入框中粘贴之前复制的 Cloudflare API 令牌。
+8. 点击 **Add secret** 完成添加。
 
 此后，GitHub Actions 工作流即可通过 `${{ secrets.CLOUDFLARE_API_TOKEN }}` 引用该密钥，实现自动化部署更新。
 
-
-## 参数配置选项
+## 配置选项
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
@@ -124,7 +123,7 @@ npx wrangler deploy
 | `ENABLE_AI` | `true` | 是否启用 AI 兜底提取 |
 | `REQUIRE_AUTH` | `false` | 是否需要认证 |
 | `FILTER_MODE` | `none` | 发件人过滤模式（none/whitelist/blacklist） |
-| `FILTER_LIST` | `""` | 过滤列表，逗号分隔的域名（如 `@openai.com,@github.com`） |
+| `FILTER_LIST` | `""` | 过滤列表，逗号分隔的发件人域名（如 `openai.com,github.com`） |
 
 >若配置 REQUIRE_AUTH 为 true ，查看后续配置 [**文档**](./REQUIRE.md)
 
@@ -141,11 +140,11 @@ npx wrangler deploy
 ```toml
 # 白名单模式：只接收 OpenAI 和 Grok 的邮件
 FILTER_MODE = "whitelist"
-FILTER_LIST = "@openai.com,@x.ai"
+FILTER_LIST = "openai.com,x.ai"
 
 # 黑名单模式：拒收特定域名
 FILTER_MODE = "blacklist"
-FILTER_LIST = "@spam.com,@trash.net"
+FILTER_LIST = "spam.com,trash.net"
 ```
 
 ## 简易使用示例
@@ -195,6 +194,12 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 > 如需更高吞吐，可升级至 Workers Paid（5$/月），写入限额变为 100 万次/月
 
+### 局限性
+
+- 免费额度每天约 500 封邮件（每封邮件写 2 个 KV 键）
+- AI 兜底只提取 4-8 位数字验证码，字母数字混合码依赖正则匹配
+- TTL 最长 30 天
+
 ## 支持的验证码格式
 
 ### 纯数字验证码
@@ -214,11 +219,6 @@ curl https://your-worker.workers.dev/{prefix}/email
 
 ### AI 语义理解兜底
 - 正则匹配失败时自动调用 Workers AI 提取
-
-## 已验证支持的平台
-
-- OpenAI
-- Grok
 
 ## 技术栈
 
